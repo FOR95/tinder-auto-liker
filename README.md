@@ -1,6 +1,7 @@
 # Tinder Auto Liker (Chrome Extension)
 
 Automatically likes profiles on Tinder with customizable speed and duration.
+
 <img width="254" alt="image" src="https://github.com/user-attachments/assets/deead816-4d8f-441b-9d93-065472c2ca50" />
 
 
