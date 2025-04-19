@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tinder Auto Liker Settings</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+    body {
+      margin: 0; padding: 16px;
+      background: #303030;
+      font-family: 'Roboto', sans-serif;
+      color: #fff;
+    }
+    .card {
+      background: #424242;
+      border-radius: 8px;
+      padding: 16px;
+      width: 280px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    h4 {
+      margin: 0 0 16px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; margin-bottom: 4px; font-size: 14px; }
+    .field input, .field select {
+      width: 100%; padding: 8px; border: none; border-radius: 4px;
+      background: #303030; color: #fff; font-size: 14px; box-sizing: border-box;
+    }
+    .toggle-btn {
+      width: 100%; padding: 12px; border: none; border-radius: 4px;
+      background: #388e3c; color: #fff; font-size: 14px; cursor: pointer;
+      box-shadow: 0 2px 2px rgba(0,0,0,0.3); margin-bottom: 16px;
+    }
+    .toggle-btn.stop { background: #d32f2f; }
+    .stats { margin-top: 16px; font-size: 14px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h4>Tinder Auto Liker</h4>
+    <button id="toggle-button" class="toggle-btn">Start</button>
+    <div class="field">
+      <label for="speed-input">Speed (ms)</label>
+      <input type="number" id="speed-input" min="50" placeholder="200">
+    </div>
+    <div class="field">
+      <label for="duration-input">Duration (s, 0 = unlimited)</label>
+      <input type="number" id="duration-input" min="0" placeholder="0">
+    </div>
+    <div class="field">
+      <label for="preset-select">Preset</label>
+      <select id="preset-select">
+        <option value="">--Preset--</option>
+        <option value="slow">Slow (1000ms)</option>
+        <option value="medium">Medium (500ms)</option>
+        <option value="fast">Fast (200ms)</option>
+      </select>
+    </div>
+    <div class="stats">
+      <div>Total likes:</div>
+      <div id="total-likes">0</div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
