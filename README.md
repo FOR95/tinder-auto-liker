@@ -37,4 +37,4 @@ Please make sure that you only run the extension under the address https://tinde
 GPL v3 - GNU General Public License
 
 ---
-Developed by itsfor
+Developed by itsfor & ChatGPT o4-mini-high
