@@ -29,6 +29,7 @@ Automatically likes on Tinder with customizable speed and duration.
 - **Duration** – how long it should like (in seconds), or `0` for unlimited
 - **Presets** – quick access to predefined speed settings
 
+Please make sure that you only run the extension under the address https://tinder.com/app/recs, otherwise errors may occur.
 
 ## License
 
