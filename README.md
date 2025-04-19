@@ -32,7 +32,7 @@ Automatically likes on Tinder with customizable speed and duration.
 
 ## License
 
-MIT License – see LICENSE
+GPL v3 - GNU General Public License
 
 ---
 Developed by itsfor
