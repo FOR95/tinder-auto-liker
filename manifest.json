@@ -1,13 +1,25 @@
 {
   "manifest_version": 3,
   "name": "Tinder Auto Liker",
-  "version": "2.2",
-  "description": "Auto liker with 16px Tinder icon only and English UI.",
-  "permissions": ["storage", "scripting"],
-  "host_permissions": ["*://*.tinder.com/*"],
+  "version": "3.5",
+  "description": "Automatically like Tinder profiles at a custom speed. Starts only when manually activated. Stops when tabs are closed.",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.tinder.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["*://*.tinder.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

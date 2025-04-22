@@ -1,44 +1,232 @@
-console.log("Tinder Auto Liker: content script loaded");
-let intervalId = null;
+// content.js
 
-function recordLike() {
-    chrome.storage.local.get({ totalLikes: 0 }, (result) => {
-        chrome.storage.local.set({ totalLikes: result.totalLikes + 1 });
-    });
-}
-
-function clickLikeButton() {
-    // Find the like button by specific class for like default background
-    const likeBtn = Array.from(document.querySelectorAll('button.gamepad-button'))
-        .find(btn => btn.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
-    if (likeBtn) {
-        likeBtn.click();
-        recordLike();
+(function () {
+    if (window.__tinderAutoLikerInit) return;
+    window.__tinderAutoLikerInit = true;
+  
+    let intervalId = null;
+    let stopTimeout = null;
+  
+    function clickLikeButton() {
+      const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
+        .find(b => b.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
+      if (btn) {
+        btn.click();
+        chrome.storage.local.get({ totalLikes: 0 }, res =>
+          chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
+        );
+      }
     }
-}
-
-function startLiking() {
-    chrome.storage.sync.get({ enabled: false, speed: 200, duration: 0 }, (items) => {
-        if (!items.enabled) {
-            if (intervalId) clearInterval(intervalId);
-            intervalId = null;
-            return;
-        }
-        if (intervalId) clearInterval(intervalId);
-        intervalId = setInterval(clickLikeButton, items.speed);
-        if (items.duration > 0) {
-            setTimeout(() => {
-                clearInterval(intervalId);
-                intervalId = null;
-            }, items.duration * 1000);
-        }
-    });
-}
-
-chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'sync' && (changes.enabled || changes.speed || changes.duration)) {
-        startLiking();
+  
+    function startLiking(speed, duration) {
+      clearInterval(intervalId);
+      if (stopTimeout) clearTimeout(stopTimeout);
+      intervalId = setInterval(clickLikeButton, speed);
+      if (duration > 0) {
+        stopTimeout = setTimeout(() => {
+          clearInterval(intervalId);
+          intervalId = null;
+          chrome.storage.sync.set({ enabled: false, manualStart: false });
+        }, duration * 1000);
+      }
+      console.log('[AutoLiker] Started');
     }
-});
+  
+    function stopLiking() {
+      clearInterval(intervalId);
+      intervalId = null;
+      if (stopTimeout) clearTimeout(stopTimeout);
+      stopTimeout = null;
+      console.log('[AutoLiker] Stopped');
+    }
+  
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'sync') return;
+  
+      if (changes.enabled) {
+        if (changes.enabled.newValue) {
+          chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+            startLiking(speed, duration)
+          );
+        } else {
+          stopLiking();
+        }
+      }
+  
+      if (changes.speed && intervalId) {
+        chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+          startLiking(speed, duration)
+        );
+      }
+    });
+  
+    // Delay init after load to allow background.js to set reset state
+    setTimeout(() => {
+      chrome.storage.sync.get(
+        { manualStart: false, speed: 200, duration: 0 },
+        ({ manualStart, speed, duration }) => {
+          if (manualStart) {
+            console.log('[AutoLiker] Starting after delay');
+            startLiking(speed, duration);
+          } else {
+            console.log('[AutoLiker] Manual start not set – skipping');
+          }
+        }
+      );
+    }, 300);
+  })();
+// content.js
 
-startLiking();
+(function () {
+    if (window.__tinderAutoLikerInit) return;
+    window.__tinderAutoLikerInit = true;
+  
+    let intervalId = null;
+    let stopTimeout = null;
+  
+    function clickLikeButton() {
+      const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
+        .find(b => b.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
+      if (btn) {
+        btn.click();
+        chrome.storage.local.get({ totalLikes: 0 }, res =>
+          chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
+        );
+      }
+    }
+  
+    function startLiking(speed, duration) {
+      clearInterval(intervalId);
+      if (stopTimeout) clearTimeout(stopTimeout);
+      intervalId = setInterval(clickLikeButton, speed);
+      if (duration > 0) {
+        stopTimeout = setTimeout(() => {
+          clearInterval(intervalId);
+          intervalId = null;
+          chrome.storage.sync.set({ enabled: false, manualStart: false });
+        }, duration * 1000);
+      }
+      console.log('[AutoLiker] Started');
+    }
+  
+    function stopLiking() {
+      clearInterval(intervalId);
+      intervalId = null;
+      if (stopTimeout) clearTimeout(stopTimeout);
+      stopTimeout = null;
+      console.log('[AutoLiker] Stopped');
+    }
+  
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'sync') return;
+  
+      if (changes.enabled) {
+        if (changes.enabled.newValue) {
+          chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+            startLiking(speed, duration)
+          );
+        } else {
+          stopLiking();
+        }
+      }
+  
+      if (changes.speed && intervalId) {
+        chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+          startLiking(speed, duration)
+        );
+      }
+    });
+  
+    // Delay init after load to allow background.js to set reset state
+    setTimeout(() => {
+      chrome.storage.sync.get(
+        { manualStart: false, speed: 200, duration: 0 },
+        ({ manualStart, speed, duration }) => {
+          if (manualStart) {
+            console.log('[AutoLiker] Starting after delay');
+            startLiking(speed, duration);
+          } else {
+            console.log('[AutoLiker] Manual start not set – skipping');
+          }
+        }
+      );
+    }, 300);
+  })();
+// content.js
+
+(function () {
+    if (window.__tinderAutoLikerInit) return;
+    window.__tinderAutoLikerInit = true;
+  
+    let intervalId = null;
+    let stopTimeout = null;
+  
+    function clickLikeButton() {
+      const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
+        .find(b => b.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
+      if (btn) {
+        btn.click();
+        chrome.storage.local.get({ totalLikes: 0 }, res =>
+          chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
+        );
+      }
+    }
+  
+    function startLiking(speed, duration) {
+      clearInterval(intervalId);
+      if (stopTimeout) clearTimeout(stopTimeout);
+      intervalId = setInterval(clickLikeButton, speed);
+      if (duration > 0) {
+        stopTimeout = setTimeout(() => {
+          clearInterval(intervalId);
+          intervalId = null;
+          chrome.storage.sync.set({ enabled: false, manualStart: false });
+        }, duration * 1000);
+      }
+      console.log('[AutoLiker] Started');
+    }
+  
+    function stopLiking() {
+      clearInterval(intervalId);
+      intervalId = null;
+      if (stopTimeout) clearTimeout(stopTimeout);
+      stopTimeout = null;
+      console.log('[AutoLiker] Stopped');
+    }
+  
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'sync') return;
+  
+      if (changes.enabled) {
+        if (changes.enabled.newValue) {
+          chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+            startLiking(speed, duration)
+          );
+        } else {
+          stopLiking();
+        }
+      }
+  
+      if (changes.speed && intervalId) {
+        chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+          startLiking(speed, duration)
+        );
+      }
+    });
+  
+    // Delay init after load to allow background.js to set reset state
+    setTimeout(() => {
+      chrome.storage.sync.get(
+        { manualStart: false, speed: 200, duration: 0 },
+        ({ manualStart, speed, duration }) => {
+          if (manualStart) {
+            console.log('[AutoLiker] Starting after delay');
+            startLiking(speed, duration);
+          } else {
+            console.log('[AutoLiker] Manual start not set – skipping');
+          }
+        }
+      );
+    }, 300);
+  })();
+      
