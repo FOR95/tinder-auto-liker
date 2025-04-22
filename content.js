@@ -1,232 +1,110 @@
 // content.js
 
 (function () {
-    if (window.__tinderAutoLikerInit) return;
-    window.__tinderAutoLikerInit = true;
-  
-    let intervalId = null;
-    let stopTimeout = null;
-  
-    function clickLikeButton() {
-      const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
-        .find(b => b.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
-      if (btn) {
-        btn.click();
-        chrome.storage.local.get({ totalLikes: 0 }, res =>
-          chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
-        );
-      }
-    }
-  
-    function startLiking(speed, duration) {
-      clearInterval(intervalId);
-      if (stopTimeout) clearTimeout(stopTimeout);
-      intervalId = setInterval(clickLikeButton, speed);
-      if (duration > 0) {
-        stopTimeout = setTimeout(() => {
-          clearInterval(intervalId);
-          intervalId = null;
-          chrome.storage.sync.set({ enabled: false, manualStart: false });
-        }, duration * 1000);
-      }
-      console.log('[AutoLiker] Started');
-    }
-  
-    function stopLiking() {
-      clearInterval(intervalId);
-      intervalId = null;
-      if (stopTimeout) clearTimeout(stopTimeout);
-      stopTimeout = null;
-      console.log('[AutoLiker] Stopped');
-    }
-  
-    chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== 'sync') return;
-  
-      if (changes.enabled) {
-        if (changes.enabled.newValue) {
-          chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
-            startLiking(speed, duration)
-          );
-        } else {
-          stopLiking();
-        }
-      }
-  
-      if (changes.speed && intervalId) {
-        chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
-          startLiking(speed, duration)
-        );
-      }
-    });
-  
-    // Delay init after load to allow background.js to set reset state
-    setTimeout(() => {
-      chrome.storage.sync.get(
-        { manualStart: false, speed: 200, duration: 0 },
-        ({ manualStart, speed, duration }) => {
-          if (manualStart) {
-            console.log('[AutoLiker] Starting after delay');
-            startLiking(speed, duration);
-          } else {
-            console.log('[AutoLiker] Manual start not set – skipping');
-          }
-        }
-      );
-    }, 300);
-  })();
-// content.js
+  if (window.__tinderAutoLikerInit) return;
+  window.__tinderAutoLikerInit = true;
 
-(function () {
-    if (window.__tinderAutoLikerInit) return;
-    window.__tinderAutoLikerInit = true;
-  
-    let intervalId = null;
-    let stopTimeout = null;
-  
-    function clickLikeButton() {
-      const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
-        .find(b => b.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
-      if (btn) {
-        btn.click();
-        chrome.storage.local.get({ totalLikes: 0 }, res =>
-          chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
-        );
-      }
-    }
-  
-    function startLiking(speed, duration) {
-      clearInterval(intervalId);
-      if (stopTimeout) clearTimeout(stopTimeout);
-      intervalId = setInterval(clickLikeButton, speed);
-      if (duration > 0) {
-        stopTimeout = setTimeout(() => {
-          clearInterval(intervalId);
-          intervalId = null;
-          chrome.storage.sync.set({ enabled: false, manualStart: false });
-        }, duration * 1000);
-      }
-      console.log('[AutoLiker] Started');
-    }
-  
-    function stopLiking() {
-      clearInterval(intervalId);
-      intervalId = null;
-      if (stopTimeout) clearTimeout(stopTimeout);
-      stopTimeout = null;
-      console.log('[AutoLiker] Stopped');
-    }
-  
-    chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== 'sync') return;
-  
-      if (changes.enabled) {
-        if (changes.enabled.newValue) {
-          chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
-            startLiking(speed, duration)
-          );
-        } else {
-          stopLiking();
-        }
-      }
-  
-      if (changes.speed && intervalId) {
-        chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
-          startLiking(speed, duration)
-        );
-      }
-    });
-  
-    // Delay init after load to allow background.js to set reset state
-    setTimeout(() => {
-      chrome.storage.sync.get(
-        { manualStart: false, speed: 200, duration: 0 },
-        ({ manualStart, speed, duration }) => {
-          if (manualStart) {
-            console.log('[AutoLiker] Starting after delay');
-            startLiking(speed, duration);
-          } else {
-            console.log('[AutoLiker] Manual start not set – skipping');
-          }
-        }
-      );
-    }, 300);
-  })();
-// content.js
+  let intervalId = null;
+  let stopTimeout = null;
+  let lastCardHTML = "";
 
-(function () {
-    if (window.__tinderAutoLikerInit) return;
-    window.__tinderAutoLikerInit = true;
-  
-    let intervalId = null;
-    let stopTimeout = null;
-  
-    function clickLikeButton() {
-      const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
-        .find(b => b.classList.contains('Bgc($c-ds-background-gamepad-sparks-like-default)'));
-      if (btn) {
+  function clickLikeButton() {
+    const btn = Array.from(document.querySelectorAll('button.gamepad-button'))
+      .find(b => {
+        const span = b.querySelector('span.Hidden');
+        return span && span.textContent.trim() === "Gefällt mir";
+      });
+
+    if (btn && !btn.disabled && btn.offsetParent !== null) {
+      try {
+        lastCardHTML = getCardSignature(); // speichern vor Klick
         btn.click();
-        chrome.storage.local.get({ totalLikes: 0 }, res =>
-          chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
-        );
+        console.log('[AutoLiker] Like-Klick ausgeführt');
+      } catch (err) {
+        console.warn('[AutoLiker] Klick fehlgeschlagen', err);
       }
+    } else {
+      console.log('[AutoLiker] Kein Like-Button sichtbar');
     }
-  
-    function startLiking(speed, duration) {
-      clearInterval(intervalId);
-      if (stopTimeout) clearTimeout(stopTimeout);
-      intervalId = setInterval(clickLikeButton, speed);
-      if (duration > 0) {
-        stopTimeout = setTimeout(() => {
-          clearInterval(intervalId);
-          intervalId = null;
-          chrome.storage.sync.set({ enabled: false, manualStart: false });
-        }, duration * 1000);
-      }
-      console.log('[AutoLiker] Started');
+  }
+
+  function getCardSignature() {
+    const card = document.querySelector('div.recsCardboard__cards'); // Kartencontainer
+    return card ? card.innerHTML.slice(0, 500) : '';
+  }
+
+  function startLiking(speed, duration) {
+    stopLiking();
+
+    intervalId = setInterval(clickLikeButton, speed);
+
+    if (duration > 0) {
+      stopTimeout = setTimeout(() => {
+        stopLiking();
+        chrome.storage.sync.set({ enabled: false, manualStart: false });
+        console.log('[AutoLiker] Zeitlimit erreicht – gestoppt');
+      }, duration * 1000);
     }
-  
-    function stopLiking() {
-      clearInterval(intervalId);
-      intervalId = null;
-      if (stopTimeout) clearTimeout(stopTimeout);
-      stopTimeout = null;
-      console.log('[AutoLiker] Stopped');
+
+    console.log(`[AutoLiker] Start mit Intervall ${speed}ms`);
+  }
+
+  function stopLiking() {
+    if (intervalId) clearInterval(intervalId);
+    intervalId = null;
+    if (stopTimeout) clearTimeout(stopTimeout);
+    stopTimeout = null;
+    console.log('[AutoLiker] Gestoppt');
+  }
+
+  // MutationObserver auf Kartenbereich
+  const observer = new MutationObserver(() => {
+    const current = getCardSignature();
+    if (current && current !== lastCardHTML) {
+      lastCardHTML = current;
+      chrome.storage.local.get({ totalLikes: 0 }, res =>
+        chrome.storage.local.set({ totalLikes: res.totalLikes + 1 })
+      );
+      console.log('[AutoLiker] Profilwechsel erkannt ✅ Zähler +1');
     }
-  
-    chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== 'sync') return;
-  
-      if (changes.enabled) {
-        if (changes.enabled.newValue) {
-          chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
-            startLiking(speed, duration)
-          );
-        } else {
-          stopLiking();
-        }
-      }
-  
-      if (changes.speed && intervalId) {
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // Auf Storage reagieren (Start/Stop)
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'sync') return;
+
+    if (changes.enabled) {
+      if (changes.enabled.newValue) {
         chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
           startLiking(speed, duration)
         );
+      } else {
+        stopLiking();
       }
-    });
-  
-    // Delay init after load to allow background.js to set reset state
-    setTimeout(() => {
-      chrome.storage.sync.get(
-        { manualStart: false, speed: 200, duration: 0 },
-        ({ manualStart, speed, duration }) => {
-          if (manualStart) {
-            console.log('[AutoLiker] Starting after delay');
-            startLiking(speed, duration);
-          } else {
-            console.log('[AutoLiker] Manual start not set – skipping');
-          }
-        }
+    }
+
+    if (changes.speed && intervalId) {
+      chrome.storage.sync.get(['speed', 'duration'], ({ speed, duration }) =>
+        startLiking(speed, duration)
       );
-    }, 300);
-  })();
-      
+    }
+  });
+
+  // Initial Startprüfung (manueller Trigger)
+  setTimeout(() => {
+    chrome.storage.sync.get(
+      { manualStart: false, speed: 200, duration: 0 },
+      ({ manualStart, speed, duration }) => {
+        if (manualStart) {
+          console.log('[AutoLiker] Manueller Start erkannt');
+          startLiking(speed, duration);
+        }
+      }
+    );
+  }, 300);
+})();

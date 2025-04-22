@@ -1,22 +1,33 @@
 // background.js
 
-// Reset everything on install
+// Setze Status bei Installation zurück
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.sync.set({ enabled: false, manualStart: false });
+  chrome.storage.sync.set({
+    enabled: false,
+    manualStart: false,
+    preset: ""
   });
-  
-  // Reset on full browser restart
-  chrome.runtime.onStartup.addListener(() => {
-    chrome.storage.sync.set({ enabled: false, manualStart: false });
+});
+
+// Setze Status bei vollständigem Chrome-Neustart zurück
+chrome.runtime.onStartup.addListener(() => {
+  chrome.storage.sync.set({
+    enabled: false,
+    manualStart: false,
+    preset: ""
   });
-  
-  // Disable auto-liker when all Tinder tabs are closed
-  chrome.tabs.onRemoved.addListener(() => {
-    chrome.tabs.query({ url: "*://*.tinder.com/*" }, (tabs) => {
-      if (tabs.length === 0) {
-        chrome.storage.sync.set({ enabled: false, manualStart: false });
-        console.log("[AutoLiker] All Tinder tabs closed. Stopping auto-liker.");
-      }
-    });
+});
+
+// Überwache Tab-Schließung: wenn keine Tinder-Tabs mehr offen → alles zurücksetzen
+chrome.tabs.onRemoved.addListener(() => {
+  chrome.tabs.query({ url: "*://*.tinder.com/*" }, (tabs) => {
+    if (tabs.length === 0) {
+      chrome.storage.sync.set({
+        enabled: false,
+        manualStart: false,
+        preset: ""
+      });
+      console.log("[AutoLiker] Alle Tinder-Tabs geschlossen → Auto-Liker deaktiviert & Preset zurückgesetzt.");
+    }
   });
-  
+});
