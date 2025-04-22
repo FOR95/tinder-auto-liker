@@ -11,30 +11,48 @@ the bug tracker. Build for status 04.2025
 ## Features
 
 🚀 Features – Tinder Auto Liker Chrome Extension
-✨ Automate your Tinder experience – swipe smarter, not harder.
 
 🔘 Manual Control
-✅ Start and Stop the auto-liker with a clean, modern UI
-✅ Preset speeds (Fast, Medium, Slow) or custom milliseconds
-✅ Duration timer for automatic stop after X seconds
+
+-✅ Start and Stop the auto-liker with a clean, modern UI	
+
+-✅ Preset speeds (Fast, Medium, Slow) or custom milliseconds
+
+-✅ Duration timer for automatic stop after X seconds
+
+################################################################
 
 ⚡ Intelligent Liking
+
 🧠 Only likes real, visible "Like" buttons
+
 🙅‍♂️ Skips when buttons are hidden, disabled, or loading
+
 🧪 Real-time profile change detection ensures accurate tracking
 
+################################################################
+
+
 📈 Like Counter
+
 📊 Displays total likes given in real time
+
 🧾 Counts only successful swipes, not click attempts
+
 🔄 Resets automatically when all Tinder tabs are closed or browser restarts
 
 🌘 Dark UI & Compact Design
+
 🖤 Clean Material Design-inspired popup
+
 💡 Responsive layout, minimal distraction
 
 🛡️ Safe & Respectful
+
 🔐 Does not store or send any personal data
+
 💤 Resets automatically on browser restart
+
 🌍 Works globally with Tinder's web interface
 
 ## Installation
